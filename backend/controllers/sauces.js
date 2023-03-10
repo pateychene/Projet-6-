@@ -3,32 +3,34 @@ const Sauce = require('../models/Sauce');
 // Récupération du module 'file system' de Node permettant de gérer ici les téléchargements et modifications d'images
 const fs = require('fs');
 
+// CREER UNE SAUCE
 
-//CREATION D'UNE SAUCE
-
-exports.createSauce = (req, res) => {
-console.log("--------------------");
-  console.log(req.body);
-console.log("--------------------");
-  let sauceGotObject = req.body.sauce ;
-  console.log(sauceGotObject);
-
-
+exports.createSauce = (req, res, next) => {
+  // On stocke les données envoyées par le front-end sous forme de form-data dans une variable en les transformant en objet js
   const sauceObject = JSON.parse(req.body.sauce);
+  // On supprime l'id généré automatiquement et envoyé par le front-end. L'id de la sauce est créé par la base MongoDB lors de la création dans la base
   delete sauceObject._id;
+  // Création d'une instance du modèle Sauce
   const sauce = new Sauce({
-      ...sauceObject,
-      imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
-      likes: 0,
-      dislikes: 0
+    ...sauceObject,
+    // On modifie l'URL de l'image, on veut l'URL complète, quelque chose dynamique avec les segments de l'URL
+    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+    likes: 0,
+    dislikes: 0,
+    usersLiked: [],
+    usersDisliked: []
   });
+  // Sauvegarde de la sauce dans la base de données
   sauce.save()
-      .then(() => res.status(201).json({ message: 'Sauce enregistrée !'}))
-      .catch(error => {
-         // console.log(json({ error }));
-          res.status(400).json({ error });
-      });
-};
+    // On envoi une réponse au frontend avec un statut 201 sinon on a une expiration de la requête
+    .then(() => res.status(201).json({
+      message: 'Sauce enregistrée !'
+    }))
+    // On ajoute un code erreur en cas de problème
+    .catch(error => res.status(400).json({
+      error
+    }));
+  };
 
 // MODIFIER UNE SAUCE
 
@@ -73,7 +75,7 @@ exports.modifySauce = (req, res, next) => {
     }))
 }
 
-// Permet de supprimer la sauce
+// SUPPRIMER UNE SAUCE
 
 exports.deleteSauce = (req, res, next) => {
   // Avant de suppr l'objet, on va le chercher pour obtenir l'url de l'image et supprimer le fichier image de la base
