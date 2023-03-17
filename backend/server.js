@@ -1,4 +1,4 @@
-/*Serveur Back-end qui va recuperer les donnees du front et interagir avec la BDD Mongo */
+//Serveur Node.js
 
 // Ecoute des requetes http et reponse
 const http = require('http');// Import du package http - https requiert un certificat SSL à obtenir avec un nom de domaine

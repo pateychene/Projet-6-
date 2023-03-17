@@ -6,9 +6,10 @@ const router = express.Router();
 
 const auth = require('../middlewares/auth');
 const multer = require('../middlewares/multer-config');
+
 const saucesCtrl = require('../controllers/sauces');
 
-
+/* Séparation de la logique métier des routes en contrôleurs */
 router.get('/', auth, saucesCtrl.getAllSauce);
 
 router.post('/', auth, multer, saucesCtrl.createSauce);

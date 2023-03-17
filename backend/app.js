@@ -16,9 +16,10 @@ const path = require('path');// Plugin qui sert dans l'upload des images et perm
 // utilisation du module 'helmet' pour la sécurité en protégeant l'application de certaines vulnérabilités
 const helmet = require('helmet');
 
+// empecher le vol de session via les cookies
 const session = require('cookie-session');
 
-//empeche la mise en cache dans le navigateur
+//empeche la mise en cache dans le navigateur pour s'assurer que l'utilsateur a toujours les donnees a jour
 const nocache = require('nocache');
 
 const fs = require ('fs');
@@ -42,15 +43,6 @@ const app = express();
 
 app.use(express.json());
 
-// Transforme les données arrivant de la requête POST en un objet JSON facilement exploitable
-app.use(bodyParser.json());
-
-// Sécuriser Express en définissant divers en-têtes HTTP 
-app.use(helmet());
-// Desactive la mise en cache du navigateur
-app.use(nocache());
-
-
 // CORS
 // Middleware Header pour contourner les erreurs en débloquant certains systèmes de sécurité CORS, afin que tout le monde puisse faire des requetes depuis son navigateur
 app.use((req, res, next) => {
@@ -60,22 +52,35 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
 // on indique les méthodes autorisées pour les requêtes HTTP
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+// on autorise ce serveur à fournir des scripts pour la page visitée
+  res.setHeader('Content-Security-Policy', "default-src 'self'");  
   next();
 });
 
-// Options pour sécuriser les cookies
-const expiryDate = new Date(Date.now() + 3600000); // 1 heure (60 * 60 * 1000)
-app.use(session({
-  name: 'session',
-  secret: process.env.SEC_SES,
-  cookie: {
-    secure: true,
-    httpOnly: true,
-    domain: 'http://localhost:3000',
-    expires: expiryDate
-  }
-}));
+var expiryDate = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
 
+app.use(session({
+
+     name: 'toto',
+
+       keys: ['key1', 'key2'],
+
+           cookie: {
+           secure: true,
+           httpOnly: true,
+           domain: 'http://localhost:3000',
+           expires: expiryDate
+            }
+  }));
+
+// Desactive la mise en cache du navigateur
+app.use(nocache());
+
+// Sécuriser Express en définissant divers en-têtes HTTP 
+app.use(helmet());
+
+// Transforme les données arrivant de la requête POST en un objet JSON facilement exploitable
+app.use(bodyParser.json());
 
 // Midleware qui permet de charger les fichiers qui sont dans le repertoire images
 app.use('/images', express.static(path.join(__dirname, 'images')));
