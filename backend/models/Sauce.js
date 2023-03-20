@@ -11,7 +11,6 @@ const sauceSchema = mongoose.Schema({
   name: {
     type: String,
     required: true,
-    validation : nameValidator
   },
   // Créateur de la sauce
   manufacturer: {
