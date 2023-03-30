@@ -76,16 +76,14 @@ app.use(session({
 // Desactive la mise en cache du navigateur
 app.use(nocache());
 
-// Sécuriser Express en définissant divers en-têtes HTTP 
-app.use(helmet());
-
 // Transforme les données arrivant de la requête POST en un objet JSON facilement exploitable
 app.use(bodyParser.json());
 
 // Midleware qui permet de charger les fichiers qui sont dans le repertoire images
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-// Routes pour la gestion de toute les ressources de l'API 
+// Sécuriser Express en définissant divers en-têtes HTTP 
+app.use(helmet());
 
 //routes dédiées aux sauces
 app.use('/api/sauces', saucesRoutes);
